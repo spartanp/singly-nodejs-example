@@ -4,18 +4,18 @@ var request = require('request');
 var sprintf = require('sprintf').sprintf;
 var OAuth2 = require('oauth').OAuth2;
 
-var apiBaseUrl = 'https://api.singly.com';
-var hostBaseUrl = 'http://localhost';
+var apiBaseUrl = process.argv[4] || 'https://api.singly.com';
 
 // The port that this express app will listen on
 var port = 8043;
+var hostBaseUrl = 'http://localhost:'+port;
 
 // Your client ID and secret from http://dev.singly.com/apps
-var clientId = '';
-var clientSecret = '';
+var clientId = process.argv[2] || '';
+var clientSecret = process.argv[3] || '';
 
 // Pick a secret to secure your session storage
-var sessionSecret = '';
+var sessionSecret = '42';
 
 var usedServices = [
    'Facebook',
@@ -23,25 +23,27 @@ var usedServices = [
    'Instagram',
    'Tumblr',
    'Twitter',
-   'LinkedIn'
+   'LinkedIn',
+   'FitBit',
+   'Email'
 ];
 
 var oa = new OAuth2(clientId, clientSecret, apiBaseUrl);
 
 // A convenience method that takes care of adding the access token to requests
 function getProtectedResource(path, session, callback) {
-   oa.getProtectedResource(baseUrl + path, session.access_token, callback);
+   oa.getProtectedResource(apiBaseUrl + path, session.access_token, callback);
 }
 
 // Given the name of a service and the array of profiles, return a link to that
 // service that's styled appropriately (i.e. show a link or a checkmark).
-function getLink(prettyName, profiles) {
+function getLink(prettyName, profiles, token) {
    var service = prettyName.toLowerCase();
 
    // If the user has a profile authorized for this service
    if (profiles && profiles[service] !== undefined) {
       // Return a unicode checkmark so that the user doesn't try to authorize it again
-      return sprintf('<span class="check">&#10003;</span> %s', prettyName);
+      return sprintf('<span class="check">&#10003;</span> <a href="%s/services/%s?access_token=%s">%s</a>', apiBaseUrl, service, token, prettyName);
    }
 
    // This flow is documented here: http://dev.singly.com/authorization
@@ -96,7 +98,7 @@ app.get('/', function(req, res) {
    for (i = 0; i < usedServices.length; i++) {
       services.push({
          name: usedServices[i],
-         link: getLink(usedServices[i], req.session.profiles)
+         link: getLink(usedServices[i], req.session.profiles, req.session.access_token)
       });
    }
 
@@ -129,7 +131,7 @@ app.get('/callback', function(req, res) {
 
       req.session.access_token = body.access_token;
 
-      singly.getProtectedResource('/profiles', req.session, function(err, profilesBody) {
+      getProtectedResource('/profiles', req.session, function(err, profilesBody) {
          try {
             profilesBody = JSON.parse(profilesBody);
          } catch(parseErr) {
