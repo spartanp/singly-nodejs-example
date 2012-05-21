@@ -23,15 +23,20 @@ $(function() {
       return;
    }
 
+   $('#access-token').val(accessToken);
+   $('#access-token-wrapper').show();
+
    // Get the user's profiles
    singly.get('/profiles', null, function(profiles) {
-      _.each(profiles, function(profile) {
-         console.log('profile', profile);
+      _.each(profiles.all, function(profile) {
+         $('#profiles').append(sprintf('<li><strong>Linked profile:</strong> %s</li>', profile));
       });
    });
 
-   // Get the 5 latest items from the user's Facebook feed
-   singly.get('/services/facebook/feed', { limit: 5 }, function(feed) {
-      console.log('feed', feed);
+   // Get the 5 latest items from the user's Twitter feed
+   singly.get('/services/twitter/timeline', { limit: 5 }, function(tweets) {
+      _.each(tweets, function(tweet) {
+         $('#twitter').append(sprintf('<li><strong>Tweet:</strong> %s</li>', tweet.data.text));
+      });
    });
 });

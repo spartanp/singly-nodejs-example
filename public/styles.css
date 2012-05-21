@@ -1,6 +1,14 @@
+* {
+   font-family: Helvetica, Arial;
+}
+
 body {
    padding: 4em;
    padding-top: 1em;
+}
+
+#access-token {
+   width: 200px;
 }
 
 a, a:visited {

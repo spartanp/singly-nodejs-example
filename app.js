@@ -4,11 +4,11 @@ var request = require('request');
 var sprintf = require('sprintf').sprintf;
 var OAuth2 = require('oauth').OAuth2;
 
-var apiBaseUrl = process.argv[4] || 'https://api.singly.com';
+var apiBaseUrl = process.argv[5] || 'https://api.singly.com';
 
 // The port that this express app will listen on
 var port = 8043;
-var hostBaseUrl = 'http://localhost:'+port;
+var hostBaseUrl = process.argv[4] || 'http://localhost:' + port;
 
 // Your client ID and secret from http://dev.singly.com/apps
 var clientId = process.argv[2] || '';
@@ -146,3 +146,5 @@ app.get('/callback', function(req, res) {
 });
 
 app.listen(port);
+
+console.log(sprintf('Listening at %s using API endpoint %s.', hostBaseUrl, apiBaseUrl));
