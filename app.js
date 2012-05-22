@@ -69,7 +69,7 @@ app.configure(function() {
    app.use(express.bodyParser());
    app.use(express.cookieParser());
    app.use(express.session({
-      secret: 'interwebs',
+      secret: sessionSecret
    }));
    app.use(app.router);
 });
